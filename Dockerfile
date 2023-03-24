@@ -1,4 +1,4 @@
-FROM python:3.7
+FROM python:3.8.2-slim-buster
 
 ARG LOCAL_PATH
 
@@ -10,7 +10,5 @@ RUN pip install --upgrade pip \
     pip install --no-cache-dir -r requirements.txt
 
 COPY ${LOCAL_PATH} /app
-
-EXPOSE 7777
 
 CMD ["python", "main.py"]

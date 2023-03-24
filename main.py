@@ -32,7 +32,7 @@ async def upload_code(sub: str, file: UploadFile = File(...)) -> PlainTextRespon
 async def upsert_code(sub:str,code:bytes=Body(...)):
     codepencil = CodePen(**{**json.loads(code), **{"sub": sub}})
     try:
-        return codepencil.upsert()
+        return codepencil._upsert()
     except Exception as e:
         codepencil.create()
         return codepencil.dict()
@@ -57,4 +57,4 @@ app.mount("/", static, name="static")
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=7777)
+    uvicorn.run(app, host="0.0.0.0", port=3000)

@@ -1,11 +1,8 @@
 from __future__ import annotations
-from typing import List, Optional
+from typing import List, Optional, Generator
 from datetime import datetime
 from src.service import S3Service
 from src.orm import *
-
-
-
 
 class User(FaunaModel):
     """User model."""
@@ -48,7 +45,7 @@ class CodePen(FaunaModel):
     
     @classmethod
     def service(cls):
-        return S3Service()
+        return S3Service().s3
     
     
     @classmethod
@@ -59,11 +56,13 @@ class CodePen(FaunaModel):
         return obj
     
     @classmethod
-    def find_by_sub(cls, sub: str) -> List[CodePen]:
+    def find_by_sub(cls, sub: str) -> Generator[dict, None, None]:
         """Get all CodePens by a user's sub."""
         codepens = cls.q()(q.paginate(q.match(q.index("codepen_by_sub"), sub)))["data"]
-        return [cls(**codepen) for codepen in codepens]
-    
+        for codepen in codepens:
+            obj = cls.q()(q.get(codepen))["data"]
+            obj["url"] = S3Service().get_url(obj["key"])
+            yield cls(**obj).upsert()
     
     @classmethod
     def find_many(cls) :

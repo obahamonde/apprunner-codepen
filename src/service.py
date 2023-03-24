@@ -75,13 +75,13 @@ class S3Service:
             config=boto3.session.Config(signature_version="s3v4")
         )
         
-    @cache()
+    @cache(3600*24*7)
     def get_url(self, key: str) -> str:
         """Get file url."""
         return self.s3.generate_presigned_url(
             "get_object",
             Params={"Bucket": env.AWS_S3_BUCKET, "Key": key},
-            ExpiresIn=3600,
+            ExpiresIn=3600*24*7
         )
         
         
@@ -90,11 +90,12 @@ class S3Service:
         try:
             self.s3.put_object(
                 Bucket=env.AWS_S3_BUCKET,
-                Key=f"{key}.html",
+                Key=key,
                 Body=file,
                 ContentType="text/html",
                 ACL="public-read"
             )
+            return self.get_url(key)
             
         except ClientError as e:
             print(e)
