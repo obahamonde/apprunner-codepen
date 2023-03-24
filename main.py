@@ -53,3 +53,8 @@ def get_code_feed():
     return CodePen.find_many()
 
 app.mount("/", static, name="static")
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
