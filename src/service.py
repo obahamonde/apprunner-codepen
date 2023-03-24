@@ -1,8 +1,8 @@
 import json
 import base64
+import boto3
 from functools import wraps
 from httpx import AsyncClient
-from boto3 import Session
 from botocore.exceptions import ClientError
 from fastapi import File, UploadFile
 from redis import Redis
@@ -66,24 +66,24 @@ class S3Service:
     """S3 service."""
 
     def __init__(self):
-        self.session = Session(
-            aws_access_key_id=env.AWS_ACCESS_KEY_ID,
-            aws_secret_access_key=env.AWS_SECRET_ACCESS_KEY,
-            region_name=env.AWS_REGION,
+        self.s3 = boto3.client(
+            "s3",
+            endpoint_url="http://localhost:9000",
+            aws_access_key_id="AKIAIOSFODNN7EXAMPLE",
+            aws_secret_access_key="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
+            region_name="us-east-1"
         )
-        self.s3 = self.session.client("s3")
-
     def upload_file(self, key: str, file: bytes) -> str:
         """Upload file."""
         try:
             self.s3.put_object(
-                Bucket=env.AWS_S3_BUCKET,
+                Bucket="codepencils"
                 Key=f"{key}.html",
                 Body=file,
                 ContentType="text/html",
                 ACL="public-read"
             )
-            return f"https://{env.AWS_S3_BUCKET}.s3.{env.AWS_REGION}.amazonaws.com/{key}.html"
+            return f"https://codepencils.locahost:9000/{key}.html"
         except ClientError as e:
             print(e)
             return "Error uploading file."
