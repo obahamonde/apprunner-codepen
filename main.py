@@ -53,7 +53,3 @@ def get_code_feed():
     return CodePen.find_many()
 
 app.mount("/", static, name="static")
-
-@app.on_event("startup")
-async def startup():
-    S3Service().s3.create_bucket(Bucket="codepencils")

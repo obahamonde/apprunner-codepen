@@ -68,25 +68,38 @@ class S3Service:
     def __init__(self):
         self.s3 = boto3.client(
             "s3",
-            endpoint_url="http://localhost:9000",
-            aws_access_key_id="AKIAIOSFODNN7EXAMPLE",
-            aws_secret_access_key="wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY",
-            region_name="us-east-1"
+            endpoint_url=env.AWS_S3_ENDPOINT,
+            aws_access_key_id=env.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=env.AWS_SECRET_ACCESS_KEY,
+            region_name="us-east-1",
+            config=boto3.session.Config(signature_version="s3v4")
         )
+        
+    @cache()
+    def get_url(self, key: str) -> str:
+        """Get file url."""
+        return self.s3.generate_presigned_url(
+            "get_object",
+            Params={"Bucket": env.AWS_S3_BUCKET, "Key": key},
+            ExpiresIn=3600,
+        )
+        
+        
     def upload_file(self, key: str, file: bytes) -> str:
         """Upload file."""
         try:
             self.s3.put_object(
-                Bucket="codepencils"
+                Bucket=env.AWS_S3_BUCKET,
                 Key=f"{key}.html",
                 Body=file,
                 ContentType="text/html",
                 ACL="public-read"
             )
-            return f"https://codepencils.locahost:9000/{key}.html"
+            
         except ClientError as e:
             print(e)
             return "Error uploading file."
+
 
     def delete_file(self, key: str) -> str:
         """Delete file."""
@@ -102,7 +115,7 @@ class AuthService:
     """Auth service."""
 
     def __init__(self):
-        self.url = f"https://{env.AUTH0_DOMAIN}/userinfo"
+        self.url = f"https://dev-tvhqmk7a.us.auth0.com/userinfo"
 
     @async_cache()
     async def get_user(self, token: str) -> dict:
