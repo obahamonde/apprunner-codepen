@@ -11,4 +11,6 @@ RUN pip install --upgrade pip \
 
 COPY ${LOCAL_PATH} /app
 
+EXPOSE 7777
+
 CMD ["python", "main.py"]

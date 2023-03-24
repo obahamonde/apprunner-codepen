@@ -22,3 +22,5 @@ var/
 .venv
 static
 frontend/node_modules
+*.lock
+./frontend
